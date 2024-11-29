@@ -17,6 +17,12 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/database";
+import { UserLogin } from "@/lib/models/UserLogin";
+import { login } from "@/lib/authMethods";
 
 const formSchema = z.object({
   dni: z.string().min(8, {
@@ -30,6 +36,8 @@ const formSchema = z.object({
 })
 
 export default function Login() {
+  const [buttonDisabled, setbuttonDisabled] = useState(false)
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,8 +45,18 @@ export default function Login() {
       password: "",
     },
   })
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setbuttonDisabled(true)
+
+    const user: UserLogin = {
+      dni: values.dni,
+      password: values.password
+    }
+
+    await login(user)
+
+    setbuttonDisabled(false)
   }
 
   return (
@@ -82,7 +100,7 @@ export default function Login() {
                 )}
               />
               <br />
-              <Button className="w-full" type="submit">Iniciar Sesión</Button>
+              <Button className="w-full" type="submit" disabled={buttonDisabled}>Iniciar Sesión</Button>
               <Link href="/register" className="w-full flex mt-2 text-sm justify-center">
                 ¿Aun no tienes una cuenta? Registrarme
               </Link>
