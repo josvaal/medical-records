@@ -2,16 +2,104 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { House, LogOut, User, UserRoundPlus, UserRoundSearch } from "lucide-react";
+import { auth } from "@/lib/database";
+import { PatientCreate } from "@/lib/models/PatientCreate";
+import { addPatient } from "@/lib/patientMethods";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signOut } from "firebase/auth";
+import { House, LogOut, RefreshCcw, RefreshCw, User, UserRoundPlus, UserRoundSearch } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+
+
+const formSchema = z.object({
+  dni: z.string().min(8, { message: "El DNI debe tener como mínimo 8 dígitos" }).max(8, { message: "El DNI debe tener como máximo 8 dígitos" }),
+  name: z.string().min(1, { message: "El nombre es obligatorio" }),
+  lastname: z.string().min(1, { message: "El apellido es obligatorio" }),
+  email: z.string().email({ message: "El correo electrónico no es válido" }),
+  phone: z.string().min(9, { message: "El número de celular debe tener al menos 9 dígitos" }),
+  address: z.string().min(1, { message: "La dirección es obligatoria" }),
+});
+
+async function logoutHandle() {
+  await signOut(auth)
+}
 
 export default function HomeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const router = useRouter()
+
+  const [buttonDisabled, setbuttonDisabled] = useState(false)
+  const [dniButton, setdniButton] = useState(false)
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      dni: "",
+      name: "",
+      lastname: "",
+      email: "",
+      phone: "",
+      address: ""
+    },
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setbuttonDisabled(true)
+
+    const patient: PatientCreate = {
+      dni: values.dni,
+      name: values.name,
+      lastname: values.lastname,
+      email: values.email,
+      phone: values.phone,
+      address: values.address
+    }
+
+    await addPatient(patient)
+    router.refresh()
+
+    setbuttonDisabled(false)
+  }
+
+  async function handleDni(): Promise<void> {
+    setdniButton(true)
+    const dni = form.getValues("dni");
+    if (!dni) return;
+
+    try {
+      const response = await fetch(`/api/fetchDni?dni=${dni}`);
+
+      if (!response.ok) {
+        console.error(`Error fetching DNI: ${response.statusText}`);
+        return;
+      }
+
+      const dniResponse = await response.json();
+
+      if (dniResponse.message === "dni invalido") return;
+
+      form.setValue("name", dniResponse.nombres);
+      form.setValue(
+        "lastname",
+        `${dniResponse.apellidoPaterno} ${dniResponse.apellidoMaterno}`
+      );
+    } catch (error) {
+      console.error("Error fetching DNI:", error);
+    }
+    setdniButton(false)
+  }
+
+
+
   return (
     <body>
       <nav className="inset-x-0 top-0 z-50 shadow-sm">
@@ -36,79 +124,134 @@ export default function HomeLayout({
                       Rellena los campos necesarios para añadir un nuevo paciente
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="dni" className="text-right">
-                        DNI
-                      </Label>
-                      <Input
-                        id="dni"
-                        defaultValue="Pedro Duarte"
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="name" className="text-right">
-                        Nombres
-                      </Label>
-                      <Input
-                        id="name"
-                        defaultValue="Pedro Duarte"
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="lastname" className="text-right">
-                        Apellidos
-                      </Label>
-                      <Input
-                        id="lastname"
-                        defaultValue="Pedro Duarte"
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="email" className="text-right">
-                        Correo
-                      </Label>
-                      <Input
-                        id="emai"
-                        type="email"
-                        defaultValue="nombre@correo.com"
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="phone" className="text-right">
-                        Nro. Celular
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        defaultValue="+51912345678"
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="address" className="text-right">
-                        Dirección
-                      </Label>
-                      <Input
-                        id="address"
-                        defaultValue="Calle Falsa 123"
-                        className="col-span-3"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button className="w-full" type="submit">Añadir</Button>
-                  </DialogFooter>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                      <div className="grid grid-cols-2 gap-5">
+                        <FormField
+                          control={form.control}
+                          name="dni"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>DNI</FormLabel>
+                              <FormControl>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="number"
+                                    placeholder="70123456"
+                                    {...field}
+                                  />
+                                  <Button
+                                    size="icon"
+                                    variant="outline"
+                                    onClick={handleDni}
+                                    disabled={dniButton}
+                                  >
+                                    <UserRoundSearch />
+                                  </Button>
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nombres</FormLabel>
+                              <FormControl>
+                                <Input
+                                  disabled
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="lastname"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Apellidos</FormLabel>
+                              <FormControl>
+                                <Input
+                                  disabled
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Correo</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="email"
+                                  placeholder="correo@mail.com"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nro. Celular</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="901234567"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Dirección</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Calle Falsa 123"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <br />
+                      <DialogFooter>
+                        <Button className="w-full" type="submit" disabled={buttonDisabled}>Añadir</Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+
                 </DialogContent>
               </Dialog>
-              <div className="flex gap-1">
+              <div className="flex gap-2">
                 <Input placeholder="Buscar por DNI" />
                 <Button variant="outline" size="icon">
                   <UserRoundSearch />
+                </Button>
+                <Button variant="outline" size="icon">
+                  <RefreshCw />
                 </Button>
               </div>
             </div>
@@ -118,7 +261,7 @@ export default function HomeLayout({
                   <User />
                 </Button>
               </Link>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={logoutHandle}>
                 <LogOut />
               </Button>
             </div>

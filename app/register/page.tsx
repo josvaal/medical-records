@@ -21,9 +21,6 @@ import { register } from "@/lib/authMethods";
 import { UserRegister } from "@/lib/models/UserRegister";
 import { UserRoundSearch } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/lib/database";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -60,6 +57,7 @@ const formSchema = z.object({
 export default function Register() {
   const [loading, setloading] = useState(true)
   const [buttonDisabled, setbuttonDisabled] = useState(false)
+  const [dniButton, setdniButton] = useState(false)
 
   useEffect(() => {
     setloading(false);
@@ -81,6 +79,7 @@ export default function Register() {
   })
 
   async function handleDni(): Promise<void> {
+    setdniButton(true)
     const dni = form.getValues("dni");
     if (!dni) return;
 
@@ -104,6 +103,7 @@ export default function Register() {
     } catch (error) {
       console.error("Error fetching DNI:", error);
     }
+    setdniButton(false)
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -199,7 +199,12 @@ export default function Register() {
                         </FormItem>
                       )}
                     />
-                    <Button size="icon" variant="outline" onClick={handleDni}>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={handleDni}
+                      disabled={dniButton}
+                    >
                       <UserRoundSearch />
                     </Button>
                   </div>

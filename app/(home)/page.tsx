@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Eye, IdCard, Mail, MapPinned, Pencil, Phone, User } from 'lucide-react'
-import React from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,9 @@ const patients = [
 ]
 
 export default function Home() {
+  // TODO: FIX THIS PLEASE, OR SHITTED THE PROJECT
+  const [patients, setpatients] = useState([])
+
   return (
     <div className="flex flex-col h-[calc(100vh-10vh)]">
       <div className='grid grid-cols-1 md:grid-cols-2 p-3 gap-3'>

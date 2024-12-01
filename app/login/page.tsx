@@ -17,10 +17,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/lib/database";
+import { useState } from "react";
 import { UserLogin } from "@/lib/models/UserLogin";
 import { login } from "@/lib/authMethods";
 
