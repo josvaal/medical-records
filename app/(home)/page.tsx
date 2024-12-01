@@ -1,51 +1,48 @@
+"use client"
+
 import Link from "next/link";
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Eye, IdCard, Mail, MapPinned, Pencil, Phone, User } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-
-const patients = [
-  {
-    uid: "1",
-    dni: "76133536",
-    name: "José Valentino",
-    lastname: "Masías Castillo"
-  }, {
-    uid: "2",
-    dni: "76133536",
-    name: "José Valentino",
-    lastname: "Masías Castillo"
-  }, {
-    uid: "3",
-    dni: "76133536",
-    name: "José Valentino",
-    lastname: "Masías Castillo"
-  }, {
-    uid: "4",
-    dni: "76133536",
-    name: "José Valentino",
-    lastname: "Masías Castillo"
-  }, {
-    uid: "5",
-    dni: "76133536",
-    name: "José Valentino",
-    lastname: "Masías Castillo"
-  },
-]
+import { getPatients } from "@/lib/patientMethods";
+import { Patients } from "@/lib/models/Patients";
 
 export default function Home() {
-  // TODO: FIX THIS PLEASE, OR SHITTED THE PROJECT
-  const [patients, setpatients] = useState([])
+  const [patients, setpatients] = useState<Patients[] | null>(null)
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const dbPatients = await getPatients();
+        if (dbPatients) {
+          setpatients(dbPatients);
+        } else {
+          console.log("No patients found");
+        }
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+      }
+    };
+
+    fetchPatients();
+  }, [])
 
   return (
     <div className="flex flex-col h-[calc(100vh-10vh)]">
+      {(patients ?? []).length == 0 ? (
+        <div className="w-full h-full flex flex-col justify-center items-center scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+          <h1>No hay pacientes agregados</h1>
+          <br />
+        </div>
+      ) : null}
       <div className='grid grid-cols-1 md:grid-cols-2 p-3 gap-3'>
-        {patients.map((patient, index) => (
-          <Card key={index} className='flex justify-between items-center'>
+        {(patients ?? []).map((patient: Patients) => (
+          <Card key={patient.id} className='flex justify-between items-center'>
             <CardHeader>
               <CardTitle>
                 <Link href={`/${patient.uid}`}>
@@ -140,7 +137,6 @@ export default function Home() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-
             </CardContent>
           </Card>
         ))}
