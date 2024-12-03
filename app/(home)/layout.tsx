@@ -1,33 +1,59 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/lib/database";
 import { PatientCreate } from "@/lib/models/PatientCreate";
 import { addPatient } from "@/lib/patientMethods";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signOut } from "firebase/auth";
-import { House, LogOut, RefreshCcw, RefreshCw, User, UserRoundPlus, UserRoundSearch } from "lucide-react";
+import {
+  House,
+  LogOut,
+  RefreshCw,
+  User,
+  UserRoundPlus,
+  UserRoundSearch,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 
-
 const formSchema = z.object({
-  dni: z.string().min(8, { message: "El DNI debe tener como mínimo 8 dígitos" }).max(8, { message: "El DNI debe tener como máximo 8 dígitos" }),
+  dni: z
+    .string()
+    .min(8, { message: "El DNI debe tener como mínimo 8 dígitos" })
+    .max(8, { message: "El DNI debe tener como máximo 8 dígitos" }),
   name: z.string().min(1, { message: "El nombre es obligatorio" }),
   lastname: z.string().min(1, { message: "El apellido es obligatorio" }),
   email: z.string().email({ message: "El correo electrónico no es válido" }),
-  phone: z.string().min(9, { message: "El número de celular debe tener al menos 9 dígitos" }),
+  phone: z
+    .string()
+    .min(9, { message: "El número de celular debe tener al menos 9 dígitos" }),
   address: z.string().min(1, { message: "La dirección es obligatoria" }),
 });
 
 async function logoutHandle() {
-  await signOut(auth)
+  await signOut(auth);
 }
 
 export default function HomeLayout({
@@ -35,10 +61,10 @@ export default function HomeLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const router = useRouter()
+  const router = useRouter();
 
-  const [buttonDisabled, setbuttonDisabled] = useState(false)
-  const [dniButton, setdniButton] = useState(false)
+  const [buttonDisabled, setbuttonDisabled] = useState(false);
+  const [dniButton, setdniButton] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,12 +74,12 @@ export default function HomeLayout({
       lastname: "",
       email: "",
       phone: "",
-      address: ""
+      address: "",
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setbuttonDisabled(true)
+    setbuttonDisabled(true);
 
     const patient: PatientCreate = {
       dni: values.dni,
@@ -61,17 +87,17 @@ export default function HomeLayout({
       lastname: values.lastname,
       email: values.email,
       phone: values.phone,
-      address: values.address
-    }
+      address: values.address,
+    };
 
-    await addPatient(patient)
-    router.refresh()
+    await addPatient(patient);
+    router.refresh();
 
-    setbuttonDisabled(false)
+    setbuttonDisabled(false);
   }
 
   async function handleDni(): Promise<void> {
-    setdniButton(true)
+    setdniButton(true);
     const dni = form.getValues("dni");
     if (!dni) return;
 
@@ -90,15 +116,13 @@ export default function HomeLayout({
       form.setValue("name", dniResponse.nombres);
       form.setValue(
         "lastname",
-        `${dniResponse.apellidoPaterno} ${dniResponse.apellidoMaterno}`
+        `${dniResponse.apellidoPaterno} ${dniResponse.apellidoMaterno}`,
       );
     } catch (error) {
       console.error("Error fetching DNI:", error);
     }
-    setdniButton(false)
+    setdniButton(false);
   }
-
-
 
   return (
     <body>
@@ -121,7 +145,8 @@ export default function HomeLayout({
                   <DialogHeader>
                     <DialogTitle>Añadir paciente</DialogTitle>
                     <DialogDescription>
-                      Rellena los campos necesarios para añadir un nuevo paciente
+                      Rellena los campos necesarios para añadir un nuevo
+                      paciente
                     </DialogDescription>
                   </DialogHeader>
                   <Form {...form}>
@@ -161,10 +186,7 @@ export default function HomeLayout({
                             <FormItem>
                               <FormLabel>Nombres</FormLabel>
                               <FormControl>
-                                <Input
-                                  disabled
-                                  {...field}
-                                />
+                                <Input disabled {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -177,10 +199,7 @@ export default function HomeLayout({
                             <FormItem>
                               <FormLabel>Apellidos</FormLabel>
                               <FormControl>
-                                <Input
-                                  disabled
-                                  {...field}
-                                />
+                                <Input disabled {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -210,10 +229,7 @@ export default function HomeLayout({
                             <FormItem>
                               <FormLabel>Nro. Celular</FormLabel>
                               <FormControl>
-                                <Input
-                                  placeholder="901234567"
-                                  {...field}
-                                />
+                                <Input placeholder="901234567" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -238,11 +254,16 @@ export default function HomeLayout({
                       </div>
                       <br />
                       <DialogFooter>
-                        <Button className="w-full" type="submit" disabled={buttonDisabled}>Añadir</Button>
+                        <Button
+                          className="w-full"
+                          type="submit"
+                          disabled={buttonDisabled}
+                        >
+                          Añadir
+                        </Button>
                       </DialogFooter>
                     </form>
                   </Form>
-
                 </DialogContent>
               </Dialog>
               <div className="flex gap-2">

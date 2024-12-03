@@ -45,7 +45,7 @@ export default function Home() {
           <Card key={patient.id} className='flex justify-between items-center'>
             <CardHeader>
               <CardTitle>
-                <Link href={`/${patient.uid}`}>
+                <Link href={`/${patient.id}`}>
                   {patient.name} {patient.lastname}
                 </Link>
               </CardTitle>

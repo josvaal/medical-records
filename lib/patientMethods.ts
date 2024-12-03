@@ -1,9 +1,32 @@
 "use client";
 
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { PatientCreate } from "./models/PatientCreate";
 import { Patients } from "./models/Patients";
 import { firestore } from "./database";
+
+export async function getPatient(uid: string): Promise<Patients | null> {
+  const docRef = doc(firestore, "patients", uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const patient: Patients = {
+      id: docSnap.id,
+      ...docSnap.data(),
+    };
+    return patient;
+  } else {
+    return null;
+  }
+}
 
 export async function getPatients(): Promise<Patients[] | null> {
   const querySnapshot = await getDocs(collection(firestore, "patients"));

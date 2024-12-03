@@ -1,20 +1,44 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ClipboardPlus } from "lucide-react";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
+import { Patients } from "@/lib/models/Patients";
+import { getPatient } from "@/lib/patientMethods";
 
 const patient = {
   name: "José Valentino",
   lastname: "Masías Castillo",
   dni: "76133536",
-  avatar_url: "https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png"
-}
+  avatar_url: "https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png",
+};
 
 const records = [
   {
@@ -28,8 +52,8 @@ const records = [
     comment: "Examen médico rutinario",
     images: [
       "https://medicaelmarques.com/wp-content/uploads/2021/11/examen-medico-laboral.jpg",
-      "https://examenesmedicosocupacionales.com.pe/wp-content/uploads/2023/03/que-estudios-se-realizan-en-un-examen-medico-preocupacional-medvida-salud.webp"
-    ]
+      "https://examenesmedicosocupacionales.com.pe/wp-content/uploads/2023/03/que-estudios-se-realizan-en-un-examen-medico-preocupacional-medvida-salud.webp",
+    ],
   },
   {
     patient: "1",
@@ -42,19 +66,49 @@ const records = [
     comment: "Examen médico rutinario",
     images: [
       "https://medicaelmarques.com/wp-content/uploads/2021/11/examen-medico-laboral.jpg",
-      "https://examenesmedicosocupacionales.com.pe/wp-content/uploads/2023/03/que-estudios-se-realizan-en-un-examen-medico-preocupacional-medvida-salud.webp"
-    ]
-  }
-]
+      "https://examenesmedicosocupacionales.com.pe/wp-content/uploads/2023/03/que-estudios-se-realizan-en-un-examen-medico-preocupacional-medvida-salud.webp",
+    ],
+  },
+];
 
-export default function Record({ params }: { params: Promise<{ uid: string }> }) {
+export default function Record({
+  params,
+}: {
+  params: Promise<{ uid: string }>;
+}) {
   const { uid } = use(params);
+  const [patient, setpatient] = useState<Patients | null>(null);
+  console.log(uid);
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const dbPatient = await getPatient(uid);
+        if (dbPatient) {
+          setpatient(dbPatient);
+          console.log(dbPatient);
+        } else {
+          console.log("No patients found");
+        }
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+      }
+    };
+
+    fetchPatients();
+  }, []);
 
   return (
     <div>
-      <h2 className="text-center mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-        Historial de {patient.name} {patient.lastname}
-      </h2>
+      {patient ? (
+        <h2 className="text-center mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+          Historial de {patient.name} {patient.lastname}
+        </h2>
+      ) : (
+        <h2 className="text-center mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+          No se encuentra este usuario
+        </h2>
+      )}
       <br />
       <div className="flex justify-center gap-2">
         <Select>
@@ -74,7 +128,10 @@ export default function Record({ params }: { params: Promise<{ uid: string }> })
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Input placeholder="Buscar historial por filtro" className="w-[20rem]" />
+        <Input
+          placeholder="Buscar historial por filtro"
+          className="w-[20rem]"
+        />
         <Button size="icon" variant="outline">
           <ClipboardPlus />
         </Button>
@@ -89,7 +146,8 @@ export default function Record({ params }: { params: Promise<{ uid: string }> })
             <DialogHeader>
               <DialogTitle>Añadir historia</DialogTitle>
               <DialogDescription>
-                Rellena los campos necesarios para añadir una nueva historia médica
+                Rellena los campos necesarios para añadir una nueva historia
+                médica
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -127,7 +185,9 @@ export default function Record({ params }: { params: Promise<{ uid: string }> })
               </div>
             </div>
             <DialogFooter>
-              <Button className="w-full" type="submit">Añadir</Button>
+              <Button className="w-full" type="submit">
+                Añadir
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -160,6 +220,5 @@ export default function Record({ params }: { params: Promise<{ uid: string }> })
         </Card>
       ))}
     </div>
-  )
+  );
 }
-
