@@ -17,7 +17,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -32,44 +31,32 @@ import { ClipboardPlus } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import { Patients } from "@/lib/models/Patients";
 import { getPatient } from "@/lib/patientMethods";
+import { PatientRecord } from "@/lib/models/PatientRecord";
+import { getRecordsByPatientId } from "@/lib/recordMehods";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-const patient = {
-  name: "José Valentino",
-  lastname: "Masías Castillo",
-  dni: "76133536",
-  avatar_url: "https://www.iconpacks.net/icons/2/free-user-icon-3296-thumb.png",
-};
-
-const records = [
-  {
-    patient: "1",
-    doctor: {
-      id: "2",
-      name: "Nombre",
-      lastname: "Apellido",
-    },
-    type: "Examen",
-    comment: "Examen médico rutinario",
-    images: [
-      "https://medicaelmarques.com/wp-content/uploads/2021/11/examen-medico-laboral.jpg",
-      "https://examenesmedicosocupacionales.com.pe/wp-content/uploads/2023/03/que-estudios-se-realizan-en-un-examen-medico-preocupacional-medvida-salud.webp",
-    ],
-  },
-  {
-    patient: "1",
-    doctor: {
-      id: "2",
-      name: "Nombre",
-      lastname: "Apellido",
-    },
-    type: "Examen",
-    comment: "Examen médico rutinario",
-    images: [
-      "https://medicaelmarques.com/wp-content/uploads/2021/11/examen-medico-laboral.jpg",
-      "https://examenesmedicosocupacionales.com.pe/wp-content/uploads/2023/03/que-estudios-se-realizan-en-un-examen-medico-preocupacional-medvida-salud.webp",
-    ],
-  },
-];
+const formSchema = z.object({
+  title: z.string().min(1, {
+    message: "El título es obligatorio",
+  }),
+  type: z.string({
+    required_error: "Selecciona el tipo de historia",
+  }),
+  comment: z.string().optional(),
+  image: z.instanceof(File).refine((file) => file.size < 20000000, {
+    message: "La imagen solo puede tener como maximo 20mb",
+  }),
+});
 
 export default function Record({
   params,
@@ -77,32 +64,63 @@ export default function Record({
   params: Promise<{ uid: string }>;
 }) {
   const { uid } = use(params);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      type: "consultation",
+      comment: "",
+    },
+  });
+
   const [patient, setpatient] = useState<Patients | null>(null);
-  console.log(uid);
+  const [records, setrecords] = useState<PatientRecord[] | null>(null);
 
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const dbPatient = await getPatient(uid);
+        const dbPatient: Patients | null = await getPatient(uid);
         if (dbPatient) {
           setpatient(dbPatient);
-          console.log(dbPatient);
         } else {
           console.log("No patients found");
         }
       } catch (error) {
-        console.error("Error fetching patients:", error);
+        console.error("Error fetching patient:", error);
+      }
+    };
+
+    const fetchRecords = async () => {
+      try {
+        const records: PatientRecord[] | null =
+          await getRecordsByPatientId(uid);
+        if (records) {
+          setrecords(records);
+        } else {
+          console.log("Not records found");
+        }
+      } catch (error) {
+        console.error("Error fetching record:", error);
       }
     };
 
     fetchPatients();
+    fetchRecords();
   }, []);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+  }
 
   return (
     <div>
       {patient ? (
         <h2 className="text-center mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-          Historial de {patient.name} {patient.lastname}
+          Historial de{" "}
+          <span className="text-blue-300">
+            {patient.name} {patient.lastname}
+          </span>
         </h2>
       ) : (
         <h2 className="text-center mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
@@ -150,40 +168,92 @@ export default function Record({
                 médica
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="title" className="text-right">
-                  Title
-                </Label>
-                <Input
-                  id="title"
-                  defaultValue="Pedro Duarte"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="comment" className="text-right">
-                  Comentarios
-                </Label>
-                <Textarea
-                  id="comment"
-                  defaultValue="Esto es un comentario sobre este examen, analisis, etc..."
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="pictures" className="text-right">
-                  Imágenes
-                </Label>
-                <Input
-                  id="pictures"
-                  className="col-span-3"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                />
-              </div>
-            </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="grid grid-cols-2 gap-5">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Título</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Tipo</SelectLabel>
+                              <SelectItem {...field} value="examen">
+                                Examen
+                              </SelectItem>
+                              <SelectItem {...field} value="consultation">
+                                Consulta
+                              </SelectItem>
+                              <SelectItem {...field} value="analysis">
+                                Analisis
+                              </SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="comment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Comentarios</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="image"
+                    render={({ field: { value, onChange, ...fieldProps } }) => (
+                      <FormItem>
+                        <FormLabel>Título</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...fieldProps}
+                            onChange={(event) =>
+                              onChange(
+                                event.target.files && event.target.files[0],
+                              )
+                            }
+                            type="file"
+                            accept="image/*"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </form>
+            </Form>
             <DialogFooter>
               <Button className="w-full" type="submit">
                 Añadir
@@ -193,7 +263,13 @@ export default function Record({
         </Dialog>
       </div>
       <br />
-      {records.map((record, index) => (
+      {(records ?? []).length == 0 ? (
+        <div className="w-full h-full flex flex-col justify-center items-center scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+          <h1>No hay historias disponibles</h1>
+          <br />
+        </div>
+      ) : null}
+      {(records ?? []).map((record, index) => (
         <Card className="m-10" key={index}>
           <CardHeader>
             <CardTitle>{record.type}</CardTitle>
