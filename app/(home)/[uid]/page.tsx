@@ -31,7 +31,7 @@ import { use, useEffect, useState } from "react";
 import { Patients } from "@/lib/models/Patients";
 import { getPatient } from "@/lib/patientMethods";
 import { PatientRecord } from "@/lib/models/PatientRecord";
-import { getRecordsByPatientId } from "@/lib/recordMehods";
+import { getRecordsByPatientId, saveRecord } from "@/lib/recordMethods";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,6 +79,7 @@ export default function Record({
 
   const [patient, setpatient] = useState<Patients | null>(null);
   const [records, setrecords] = useState<PatientRecord[] | null>(null);
+  const [buttondisabled, setbuttondisabled] = useState(false)
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -113,6 +114,7 @@ export default function Record({
   }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setbuttondisabled(true);
     const response = await fetch("/api/upload", {
       method: "POST",
       body: values.image
@@ -128,6 +130,7 @@ export default function Record({
 
       if (medic != null) {
         const patientRecord: CreatePatientRecord = {
+          title: values.title,
           type: values.type,
           doctor: {
             id: medic.id,
@@ -135,11 +138,12 @@ export default function Record({
             lastname: medic.lastName
           },
           comment: values.comment ?? "",
-          image: data.filePath
+          image: data.filePath,
+          patientId: uid
         }
 
-        console.log(patientRecord)
-        //TODO: UPLOAD TO DATABASE PLS
+        //console.log(patientRecord)
+        await saveRecord(patientRecord);
       } else {
         console.log('Médico no encontrado');
       }
@@ -148,6 +152,7 @@ export default function Record({
       console.error('Error en la subida del archivo');
     }
     //console.log(values);
+    setbuttondisabled(false)
   }
 
   return (
@@ -271,7 +276,7 @@ export default function Record({
                     name="image"
                     render={({ field: { value, onChange, ...fieldProps } }) => (
                       <FormItem>
-                        <FormLabel>Título</FormLabel>
+                        <FormLabel>Imágen</FormLabel>
                         <FormControl>
                           <Input
                             {...fieldProps}
@@ -290,7 +295,7 @@ export default function Record({
                   />
                 </div>
                 <br />
-                <Button className="w-full" type="submit">
+                <Button className="w-full" type="submit" disabled={buttondisabled}>
                   Añadir
                 </Button>
               </form>
@@ -309,12 +314,20 @@ export default function Record({
       {(records ?? []).map((record, index) => (
         <Card className="m-10" key={index}>
           <CardHeader>
-            <CardTitle>{record.type}</CardTitle>
+            <CardTitle className="text-2xl font-bold">{record.title.toUpperCase()}</CardTitle>
             <CardDescription>
               Doctor: {record.doctor.name} {record.doctor.lastname}
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <h5 className="scroll-m-20 text-xl font-semibold tracking-tight">
+              Tipo:
+            </h5>
+            <p className="leading-7 mt-2 mb-5">{
+              record.type == "exam" ? "Exámen" :
+                record.type == "analysis" ? "Análisis" :
+                  record.type == "consultation" ? "Consulta" : ""
+            }</p>
             <h5 className="scroll-m-20 text-xl font-semibold tracking-tight">
               Comentarios:
             </h5>

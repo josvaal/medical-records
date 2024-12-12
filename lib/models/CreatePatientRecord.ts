@@ -1,4 +1,5 @@
 export interface CreatePatientRecord {
+  title: string;
   type: string;
   doctor: {
     id: string;
@@ -7,4 +8,5 @@ export interface CreatePatientRecord {
   };
   comment: string;
   image: string;
+  patientId: string;
 }

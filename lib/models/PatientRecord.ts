@@ -1,5 +1,6 @@
 export interface PatientRecord {
   id: string;
+  title: string;
   type: string;
   doctor: {
     id: string;
@@ -8,4 +9,5 @@ export interface PatientRecord {
   };
   comment: string;
   image: string;
+  patientId: string;
 }
