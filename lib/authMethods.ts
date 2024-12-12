@@ -21,11 +21,14 @@ export async function register(user: UserRegister): Promise<void> {
     return;
   }
 
-  await createUserWithEmailAndPassword(auth, user.email, user.password);
+  const userAuth = await createUserWithEmailAndPassword(auth, user.email, user.password);
 
   const { password, repeatPassword, ...userData } = user;
 
-  const docRef = await addDoc(collection(firestore, "user_metadata"), userData);
+  const docRef = await addDoc(collection(firestore, "user_metadata"), {
+    ...userData,
+    id: userAuth.user.uid
+  });
   console.log("Metadata subida a " + docRef.id);
 
   redirect("/")

@@ -11,7 +11,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -44,6 +43,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { CreatePatientRecord } from "@/lib/models/CreatePatientRecord";
+import { auth } from "@/lib/database";
+import { UserMetadata } from "@/lib/models/UserMetadata";
+import { getMedicById } from "@/lib/medicMethods";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -110,7 +113,41 @@ export default function Record({
   }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: values.image
+    })
+
+    if (response.ok) {
+      const data = await response.json();
+      //console.log('Archivo guardado en:', data.filePath);
+
+      const user = auth.currentUser;
+      console.log(user?.uid)
+      const medic: UserMetadata | null = await getMedicById(user?.uid ?? "")
+
+      if (medic != null) {
+        const patientRecord: CreatePatientRecord = {
+          type: values.type,
+          doctor: {
+            id: medic.id,
+            name: medic.firstName,
+            lastname: medic.lastName
+          },
+          comment: values.comment ?? "",
+          image: data.filePath
+        }
+
+        console.log(patientRecord)
+        //TODO: UPLOAD TO DATABASE PLS
+      } else {
+        console.log('Médico no encontrado');
+      }
+
+    } else {
+      console.error('Error en la subida del archivo');
+    }
+    //console.log(values);
   }
 
   return (
@@ -252,13 +289,13 @@ export default function Record({
                     )}
                   />
                 </div>
+                <br />
+                <Button className="w-full" type="submit">
+                  Añadir
+                </Button>
               </form>
             </Form>
-            <DialogFooter>
-              <Button className="w-full" type="submit">
-                Añadir
-              </Button>
-            </DialogFooter>
+
           </DialogContent>
         </Dialog>
       </div>
@@ -286,11 +323,9 @@ export default function Record({
               Imágenes adjuntas:
             </h5>
             <div className="grid grid-cols-1 md:grid-cols-2 p-10">
-              {record.images.map((image, index) => (
-                <div className="flex justify-center items-center" key={index}>
-                  <img src={image} className="h-[20rem]" />
-                </div>
-              ))}
+              <div className="flex justify-center items-center">
+                <img src={record.image} className="h-[20rem]" />
+              </div>
             </div>
           </CardContent>
         </Card>

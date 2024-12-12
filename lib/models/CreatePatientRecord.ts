@@ -1,5 +1,4 @@
-export interface PatientRecord {
-  id: string;
+export interface CreatePatientRecord {
   type: string;
   doctor: {
     id: string;

@@ -2,8 +2,8 @@ export interface UserMetadata {
   id: string;
   email: string;
   dni: string;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   phone: string;
   profession: string;
   direction: string;

@@ -1,6 +1,7 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { PatientRecord } from "./models/PatientRecord";
 import { firestore } from "./database";
+import { CreatePatientRecord } from "./models/CreatePatientRecord";
 
 export async function getRecordsByPatientId(
   id: string,
@@ -14,22 +15,26 @@ export async function getRecordsByPatientId(
   const records: PatientRecord[] = [];
 
   querySnapshot.forEach((doc) => {
-    const { type, doctor, comment, images } = doc.data();
+    const { type, doctor, comment, image } = doc.data();
 
     const record: PatientRecord = {
       id: doc.id,
       type: type,
       doctor: {
-        id: doctor.id,
         name: doctor.name,
         lastname: doctor.lastname,
+        id: doctor.id
       },
       comment: comment,
-      images: images,
+      image: image,
     };
 
     records.push(record);
   });
 
   return records;
+}
+
+export async function saveRecord(createPatientRecord: CreatePatientRecord): Promise<void> {
+  return
 }
