@@ -7,14 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,28 +17,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { ClipboardPlus } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import { Patients } from "@/lib/models/Patients";
 import { getPatient } from "@/lib/patientMethods";
 import { PatientRecord } from "@/lib/models/PatientRecord";
-import { getRecordsByPatientId, saveRecord } from "@/lib/recordMethods";
+import { deleteRecord, getRecordsByPatientId, saveRecord, updateRecord } from "@/lib/recordMethods";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { CreatePatientRecord } from "@/lib/models/CreatePatientRecord";
+import { EditPatientRecord } from "@/lib/models/EditPatientRecord";
 import { auth } from "@/lib/database";
 import { UserMetadata } from "@/lib/models/UserMetadata";
 import { getMedicById } from "@/lib/medicMethods";
+import { AddRecordDialog } from "./AddRecordDialog";
+import { editFormSchema, EditRecordDialog } from "./EditRecordDialog";
+import { DeleteRecordDialog } from "./DeleteRecordDialog";
+import { CreatePatientRecord } from "@/lib/models/CreatePatientRecord";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -60,6 +47,7 @@ const formSchema = z.object({
     message: "La imagen solo puede tener como maximo 20mb",
   }),
 });
+
 
 export default function Record({
   params,
@@ -81,34 +69,34 @@ export default function Record({
   const [records, setrecords] = useState<PatientRecord[] | null>(null);
   const [buttondisabled, setbuttondisabled] = useState(false)
 
+  const fetchPatients = async () => {
+    try {
+      const dbPatient: Patients | null = await getPatient(uid);
+      if (dbPatient) {
+        setpatient(dbPatient);
+      } else {
+        console.log("No patients found");
+      }
+    } catch (error) {
+      console.error("Error fetching patient:", error);
+    }
+  };
+
+  const fetchRecords = async () => {
+    try {
+      const records: PatientRecord[] | null =
+        await getRecordsByPatientId(uid);
+      if (records) {
+        setrecords(records);
+      } else {
+        console.log("Not records found");
+      }
+    } catch (error) {
+      console.error("Error fetching record:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const dbPatient: Patients | null = await getPatient(uid);
-        if (dbPatient) {
-          setpatient(dbPatient);
-        } else {
-          console.log("No patients found");
-        }
-      } catch (error) {
-        console.error("Error fetching patient:", error);
-      }
-    };
-
-    const fetchRecords = async () => {
-      try {
-        const records: PatientRecord[] | null =
-          await getRecordsByPatientId(uid);
-        if (records) {
-          setrecords(records);
-        } else {
-          console.log("Not records found");
-        }
-      } catch (error) {
-        console.error("Error fetching record:", error);
-      }
-    };
-
     fetchPatients();
     fetchRecords();
   }, []);
@@ -152,7 +140,31 @@ export default function Record({
       console.error('Error en la subida del archivo');
     }
     //console.log(values);
-    setbuttondisabled(false)
+    setbuttondisabled(false);
+    fetchRecords()
+  }
+
+  async function onEditSubmit(values: z.infer<typeof editFormSchema>) {
+    setbuttondisabled(true);
+
+    const patientRecord: EditPatientRecord = {
+      id: values.id,
+      title: values.title,
+      type: values.type,
+      comment: values.comment ?? "",
+      patientId: uid,
+    }
+    console.log(values);
+
+    await updateRecord(patientRecord)
+
+    setbuttondisabled(false);
+    fetchRecords()
+  }
+
+  async function handleDelete(id: string) {
+    await deleteRecord(id)
+    fetchRecords()
   }
 
   return (
@@ -198,111 +210,7 @@ export default function Record({
       </div>
       <br />
       <div className="flex justify-center gap-2">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Añadir Historia</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Añadir historia</DialogTitle>
-              <DialogDescription>
-                Rellena los campos necesarios para añadir una nueva historia
-                médica
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid grid-cols-2 gap-5">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Título</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Tipo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Tipo</SelectLabel>
-                              <SelectItem {...field} value="examen">
-                                Examen
-                              </SelectItem>
-                              <SelectItem {...field} value="consultation">
-                                Consulta
-                              </SelectItem>
-                              <SelectItem {...field} value="analysis">
-                                Analisis
-                              </SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="comment"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Comentarios</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="image"
-                    render={({ field: { value, onChange, ...fieldProps } }) => (
-                      <FormItem>
-                        <FormLabel>Imágen</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...fieldProps}
-                            onChange={(event) =>
-                              onChange(
-                                event.target.files && event.target.files[0],
-                              )
-                            }
-                            type="file"
-                            accept="image/*"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <br />
-                <Button className="w-full" type="submit" disabled={buttondisabled}>
-                  Añadir
-                </Button>
-              </form>
-            </Form>
-
-          </DialogContent>
-        </Dialog>
+        <AddRecordDialog buttondisabled={buttondisabled} form={form} onSubmit={onSubmit} />
       </div>
       <br />
       {(records ?? []).length == 0 ? (
@@ -314,7 +222,22 @@ export default function Record({
       {(records ?? []).map((record, index) => (
         <Card className="m-10" key={index}>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">{record.title.toUpperCase()}</CardTitle>
+            <CardTitle className="flex justify-between">
+              <h1 className="text-2xl font-bold">
+                {record.title.toUpperCase()}
+              </h1>
+              <div className="flex gap-3">
+                <EditRecordDialog
+                  buttondisabled={buttondisabled}
+                  onSubmit={onEditSubmit}
+                  record={record}
+                />
+                <DeleteRecordDialog
+                  handleDelete={handleDelete}
+                  record={record}
+                />
+              </div>
+            </CardTitle>
             <CardDescription>
               Doctor: {record.doctor.name} {record.doctor.lastname}
             </CardDescription>

@@ -1,7 +1,8 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { PatientRecord } from "./models/PatientRecord";
 import { firestore } from "./database";
 import { CreatePatientRecord } from "./models/CreatePatientRecord";
+import { EditPatientRecord } from "./models/EditPatientRecord";
 
 export async function getRecordsByPatientId(
   id: string,
@@ -37,7 +38,18 @@ export async function getRecordsByPatientId(
   return records;
 }
 
-export async function saveRecord(createPatientRecord: CreatePatientRecord): Promise<void> {
-  const docref = await addDoc(collection(firestore, "records"), createPatientRecord)
+export async function saveRecord(record: CreatePatientRecord): Promise<void> {
+  const docref = await addDoc(collection(firestore, "records"), record)
   console.log(`Historia medica subida a: ${docref.id}`)
+}
+
+export async function deleteRecord(id: string): Promise<void> {
+  await deleteDoc(doc(firestore, "records", id))
+}
+
+export async function updateRecord(record: EditPatientRecord): Promise<void> {
+  const recordRef = doc(firestore, "records", record.id)
+  await updateDoc(recordRef, {
+    ...record
+  });
 }
