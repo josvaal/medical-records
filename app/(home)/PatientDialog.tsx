@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Patients } from "@/lib/models/Patients"
+import { Patient } from "@/lib/models/Patients"
 import { Eye, IdCard, Mail, MapPinned, Phone, User } from "lucide-react"
 
 type PatientDialogProps = {
-  patient: Patients 
+  patient: Patient
 }
 
 export const PatientDialog: React.FC<PatientDialogProps> = ({ patient }) => {
