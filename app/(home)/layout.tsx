@@ -19,15 +19,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { auth } from "@/lib/database";
-import { PatientCreate } from "@/lib/models/PatientCreate";
-import { addPatient } from "@/lib/patientMethods";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signOut } from "firebase/auth";
 import {
   House,
   LogOut,
-  RefreshCw,
   User,
   UserRoundPlus,
   UserRoundSearch,
@@ -53,7 +48,7 @@ const formSchema = z.object({
 });
 
 async function logoutHandle() {
-  await signOut(auth);
+  localStorage.removeItem("user");
 }
 
 export default function HomeLayout({
@@ -80,19 +75,8 @@ export default function HomeLayout({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setbuttonDisabled(true);
-
-    const patient: PatientCreate = {
-      dni: values.dni,
-      name: values.name,
-      lastname: values.lastname,
-      email: values.email,
-      phone: values.phone,
-      address: values.address,
-    };
-
-    await addPatient(patient);
+    console.log(values);
     router.refresh();
-
     setbuttonDisabled(false);
   }
 
@@ -116,7 +100,7 @@ export default function HomeLayout({
       form.setValue("name", dniResponse.nombres);
       form.setValue(
         "lastname",
-        `${dniResponse.apellidoPaterno} ${dniResponse.apellidoMaterno}`,
+        `${dniResponse.apellidoPaterno} ${dniResponse.apellidoMaterno}`
       );
     } catch (error) {
       console.error("Error fetching DNI:", error);
@@ -266,15 +250,6 @@ export default function HomeLayout({
                   </Form>
                 </DialogContent>
               </Dialog>
-              <div className="flex gap-2">
-                <Input placeholder="Buscar por DNI" />
-                <Button variant="outline" size="icon">
-                  <UserRoundSearch />
-                </Button>
-                <Button variant="outline" size="icon">
-                  <RefreshCw />
-                </Button>
-              </div>
             </div>
             <div className="flex justify-end gap-5">
               <Link href="/profile">

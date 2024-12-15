@@ -1,14 +1,11 @@
 "use client";
 import * as z from "zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Edit, Mail, MapPin, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { UserMetadata } from "@/lib/models/UserMetadata";
-import { getMedic, updateMedic } from "@/lib/medicMethods";
-import { useStore } from "@/lib/utils";
 import { EditProfileForm } from "./EditProfileForm";
 
 const formSchema = z.object({
@@ -23,49 +20,20 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function Profile() {
-  const { isLoading } = useStore();
   const [isEditing, setIsEditing] = useState(false);
-  const [medicData, setMedicData] = useState<UserMetadata | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      phone: "",
-      direction: "",
+      phone: "+51 999 999 999",
+      direction: "Calle Falsa 123",
     },
   });
 
   async function onSubmit(values: FormData) {
-    setMedicData({ ...medicData!, ...values });
-
-    //console.log(medicData);
-    await updateMedic(values);
-
+    console.log(values)
     setIsEditing(false);
-    fetchMedic();
   }
-
-  async function fetchMedic() {
-    try {
-      const medic: UserMetadata | null = await getMedic();
-      if (medic) {
-        setMedicData(medic);
-        form.setValue("phone", medic?.phone ?? "");
-        form.setValue("direction", medic?.direction ?? "");
-        console.log(medic);
-      } else {
-        console.log("Medic not found");
-      }
-    } catch (error) {
-      console.error("Error fetching medic:", error);
-    }
-    console.log(isLoading);
-  }
-
-  useEffect(() => {
-    fetchMedic();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className="flex w-full mt-10 justify-center items-center">
@@ -74,10 +42,10 @@ export default function Profile() {
           <div className="flex justify-between items-center w-full">
             <div>
               <CardTitle>
-                {medicData?.firstName} {medicData?.lastName}
+                USUARIO DEMO
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                {medicData?.profession}
+                Tester
               </p>
             </div>
             <div>
@@ -94,15 +62,15 @@ export default function Profile() {
             <div>
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 opacity-70" />
-                <span>{medicData?.phone}</span>
+                <span>+51 999 999 999</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 opacity-70" />
-                <span>{medicData?.email}</span>
+                <span>demo@email.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 opacity-70" />
-                <span>{medicData?.direction}</span>
+                <span>Calle Falsa 123</span>
               </div>
             </div>
           )}

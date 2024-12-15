@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Pencil } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,21 +19,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { getPatients, updatePatient } from "@/lib/patientMethods";
-import { Patients } from "@/lib/models/Patients";
+import { Patient } from "@/lib/models/Patients";
 import { PatientDialog } from "./PatientDialog";
 import { z } from "zod";
 import { EditPatientForm } from "./EditPatientForm";
-import { PatientEdit } from "@/lib/models/PatientEdit";
+import { patients } from "@/lib/patients";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formSchema = z.object({
@@ -48,39 +38,11 @@ const formSchema = z.object({
 });
 
 export default function Home() {
-  const [patients, setpatients] = useState<Patients[] | null>(null);
   const [buttonDisabled, setButtonDisabled] = useState(false);
-
-  const fetchPatients = async () => {
-    try {
-      const dbPatients = await getPatients();
-      if (dbPatients) {
-        setpatients(dbPatients);
-      } else {
-        console.log("No patients found");
-      }
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchPatients();
-  }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setButtonDisabled(true);
-
-    const newPatient: PatientEdit = {
-      id: values.id,
-      email: values.email,
-      address: values.address,
-      phone: values.phone,
-    };
-
-    await updatePatient(newPatient);
-
-    fetchPatients();
+    console.log(values)
     setButtonDisabled(false);
   }
 
@@ -93,7 +55,7 @@ export default function Home() {
         </div>
       ) : null}
       <div className="grid grid-cols-1 md:grid-cols-2 p-3 gap-3">
-        {(patients ?? []).map((patient: Patients) => (
+        {(patients ?? []).map((patient: Patient) => (
           <Card key={patient.id} className="flex justify-between items-center">
             <CardHeader>
               <CardTitle>
@@ -129,31 +91,6 @@ export default function Home() {
           </Card>
         ))}
       </div>
-      <div className="flex-1"></div>
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#?start=0?end=10" isActive>
-              1
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#?start=10?end=20">2</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#?start=20?end=30">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
     </div>
   );
 }

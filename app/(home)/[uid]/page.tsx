@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,38 +6,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ClipboardPlus } from "lucide-react";
 import { use, useEffect, useState } from "react";
-import { Patients } from "@/lib/models/Patients";
-import { getPatient } from "@/lib/patientMethods";
+import { Patient } from "@/lib/models/Patients";
 import { PatientRecord } from "@/lib/models/PatientRecord";
-import {
-  deleteRecord,
-  getRecordsByPatientId,
-  saveRecord,
-  updateRecord,
-} from "@/lib/recordMethods";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EditPatientRecord } from "@/lib/models/EditPatientRecord";
-import { auth } from "@/lib/database";
-import { UserMetadata } from "@/lib/models/UserMetadata";
-import { getMedicById } from "@/lib/medicMethods";
 import { AddRecordDialog } from "./AddRecordDialog";
 import { editFormSchema, EditRecordDialog } from "./EditRecordDialog";
 import { DeleteRecordDialog } from "./DeleteRecordDialog";
-import { CreatePatientRecord } from "@/lib/models/CreatePatientRecord";
+import { patients } from "@/lib/patients";
+import { patientRecords } from "@/lib/records";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -71,34 +49,36 @@ export default function Record({
     },
   });
 
-  const [patient, setpatient] = useState<Patients | null>(null);
+  const [patient, setpatient] = useState<Patient | null>(null);
   const [records, setrecords] = useState<PatientRecord[] | null>(null);
   const [buttondisabled, setbuttondisabled] = useState(false);
 
-  const fetchPatients = async () => {
-    try {
-      const dbPatient: Patients | null = await getPatient(uid);
-      if (dbPatient) {
-        setpatient(dbPatient);
-      } else {
-        console.log("No patients found");
-      }
-    } catch (error) {
-      console.error("Error fetching patient:", error);
+  function isById(patient: { id: string; }) {
+    return patient.id === uid;
+  }
+  
+  const fetchPatients = () => {
+    const dbPatient = patients.find(isById);
+  
+    if (dbPatient) {
+      const patient: Patient = {
+        ...dbPatient
+      };
+      setpatient(patient);
+    } else {
+      console.log('Paciente no encontrado');
+      setpatient(null);
     }
   };
 
+  function recordById(record: { patientId: string }) {
+    return record.patientId === uid;
+  }
+  
   const fetchRecords = async () => {
-    try {
-      const records: PatientRecord[] | null = await getRecordsByPatientId(uid);
-      if (records) {
-        setrecords(records);
-      } else {
-        console.log("Not records found");
-      }
-    } catch (error) {
-      console.error("Error fetching record:", error);
-    }
+    const filteredRecords = patientRecords.filter(recordById);
+
+    setrecords(filteredRecords);
   };
 
   useEffect(() => {
@@ -109,66 +89,20 @@ export default function Record({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setbuttondisabled(true);
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: values.image,
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      //console.log('Archivo guardado en:', data.filePath);
-
-      const user = auth.currentUser;
-      console.log(user?.uid);
-      const medic: UserMetadata | null = await getMedicById(user?.uid ?? "");
-
-      if (medic != null) {
-        const patientRecord: CreatePatientRecord = {
-          title: values.title,
-          type: values.type,
-          doctor: {
-            id: medic.id,
-            name: medic.firstName,
-            lastname: medic.lastName,
-          },
-          comment: values.comment ?? "",
-          image: data.filePath,
-          patientId: uid,
-        };
-
-        //console.log(patientRecord)
-        await saveRecord(patientRecord);
-      } else {
-        console.log("Médico no encontrado");
-      }
-    } else {
-      console.error("Error en la subida del archivo");
-    }
-    //console.log(values);
+    console.log(values);
     setbuttondisabled(false);
     fetchRecords();
   }
 
   async function onEditSubmit(values: z.infer<typeof editFormSchema>) {
     setbuttondisabled(true);
-
-    const patientRecord: EditPatientRecord = {
-      id: values.id,
-      title: values.title,
-      type: values.type,
-      comment: values.comment ?? "",
-      patientId: uid,
-    };
-    console.log(values);
-
-    await updateRecord(patientRecord);
-
+    console.log(values)
     setbuttondisabled(false);
     fetchRecords();
   }
 
   async function handleDelete(id: string) {
-    await deleteRecord(id);
+    console.log(id)
     fetchRecords();
   }
 
@@ -186,33 +120,6 @@ export default function Record({
           No se encuentra este usuario
         </h2>
       )}
-      <br />
-      <div className="flex justify-center gap-2">
-        <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Selecciona un filtro" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Información</SelectLabel>
-              <SelectItem value="comment">Comentario</SelectItem>
-            </SelectGroup>
-            <SelectGroup>
-              <SelectLabel>Tipo</SelectLabel>
-              <SelectItem value="exam">Examen</SelectItem>
-              <SelectItem value="consultation">Consulta</SelectItem>
-              <SelectItem value="analysis">Análisis</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Input
-          placeholder="Buscar historial por filtro"
-          className="w-[20rem]"
-        />
-        <Button size="icon" variant="outline">
-          <ClipboardPlus />
-        </Button>
-      </div>
       <br />
       <div className="flex justify-center gap-2">
         <AddRecordDialog

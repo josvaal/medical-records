@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import "./globals.css";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/database";
-import { onAuthStateChanged } from "firebase/auth";
 import { Loader } from "lucide-react";
 import { useStore } from "@/lib/utils";
 
@@ -18,17 +16,23 @@ export default function RootLayout({
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("User state changed:", user);
-      if (!user) {
-        router.push("/login");
-      } else {
-        router.push("/");
-      }
-      setLoading(false);
-    });
+    const user = localStorage.getItem("user");
 
-    return () => unsubscribe();
+    if (!user) {
+      router.push("/login");
+    } else {
+      try {
+        const parsedUser = JSON.parse(user);
+
+        if (parsedUser.dni === "12345678" && parsedUser.password === "admin123") {
+          router.push("/");
+        }
+      } catch (error) {
+        console.error("Error al parsear el usuario:", error);
+        router.push("/login");
+      }
+    }
+    setLoading(false);
   }, [router]);
 
   if (isLoading) {

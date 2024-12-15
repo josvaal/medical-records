@@ -1,11 +1,10 @@
-"use client"
+"use client";
 
-import Link from "next/link";
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from 'zod'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,26 +13,36 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useState } from "react";
 import { UserLogin } from "@/lib/models/UserLogin";
-import { login } from "@/lib/authMethods";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  dni: z.string().min(8, {
-    message: "El DNI debe tener como minimo 8 digitos",
-  }).max(8, {
-    message: "El DNI debe tener como maximo 8 digitos"
-  }),
+  dni: z
+    .string()
+    .min(8, {
+      message: "El DNI debe tener como minimo 8 digitos",
+    })
+    .max(8, {
+      message: "El DNI debe tener como maximo 8 digitos",
+    }),
   password: z.string().min(6, {
-    message: "La contraseña contiene 6 digitos como mínimo"
-  })
-})
+    message: "La contraseña contiene 6 digitos como mínimo",
+  }),
+});
 
 export default function Login() {
-  const [buttonDisabled, setbuttonDisabled] = useState(false)
+  const router = useRouter();
+  const [buttonDisabled, setbuttonDisabled] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,27 +50,40 @@ export default function Login() {
       dni: "",
       password: "",
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setbuttonDisabled(true)
+    setbuttonDisabled(true);
 
     const user: UserLogin = {
       dni: values.dni,
-      password: values.password
-    }
+      password: values.password,
+    };
 
-    await login(user)
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...user,
+      })
+    );
+    router.push("/");
 
-    setbuttonDisabled(false)
+    setbuttonDisabled(false);
   }
 
   return (
     <div className="flex items-center justify-center h-screen w-full">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Iniciar Sesión</CardTitle>
-          <CardDescription>Ingresa tus credenciales para iniciar sesión</CardDescription>
+          <CardTitle>Demo</CardTitle>
+          <CardDescription>
+          <p className="leading-7">
+              <b>DNI:</b> <span className="text-blue-200">12345678</span>
+            </p>
+            <p className="leading-7">
+              <b>Contraseña:</b> <span className="text-blue-200">admin123</span>
+            </p>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -75,10 +97,11 @@ export default function Login() {
                     <FormControl>
                       <Input type="number" placeholder="70123456" {...field} />
                     </FormControl>
-                    <FormDescription>Documento Nacional de Identidad</FormDescription>
+                    <FormDescription>
+                      Documento Nacional de Identidad
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
-
                 )}
               />
               <br />
@@ -97,15 +120,17 @@ export default function Login() {
                 )}
               />
               <br />
-              <Button className="w-full" type="submit" disabled={buttonDisabled}>Iniciar Sesión</Button>
-              <Link href="/register" className="w-full flex mt-2 text-sm justify-center">
-                ¿Aun no tienes una cuenta? Registrarme
-              </Link>
+              <Button
+                className="w-full"
+                type="submit"
+                disabled={buttonDisabled}
+              >
+                Iniciar Sesión
+              </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-
