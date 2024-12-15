@@ -8,7 +8,7 @@
 
 <h2>🚀 Demo</h2>
 
-[https://demo.com](https://demo.com)
+[https://medical-records-demo.vercel.app/](https://medical-records-demo.vercel.app/)
 
 <h2>Capturas de pantalla del proyecto:</h2>
 
