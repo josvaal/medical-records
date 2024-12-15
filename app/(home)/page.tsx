@@ -3,34 +3,62 @@
 import Link from "next/link";
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, IdCard, Mail, MapPinned, Pencil, Phone, User } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { getPatients } from "@/lib/patientMethods";
+import { getPatients, updatePatient } from "@/lib/patientMethods";
 import { Patients } from "@/lib/models/Patients";
+import { PatientDialog } from "./PatientDialog";
+import { z } from "zod";
+import { EditPatientForm } from "../EditPatientForm";
+import { PatientEdit } from "@/lib/models/PatientEdit";
+
+const formSchema = z.object({
+  email: z.string().email({ message: "El correo electrónico no es válido" }),
+  phone: z
+    .string()
+    .min(9, { message: "El número de celular debe tener al menos 9 dígitos" }),
+  address: z.string().min(5, { message: "La dirección debe tener más de 5 caracteres" }),
+  id: z.string()
+})
 
 export default function Home() {
   const [patients, setpatients] = useState<Patients[] | null>(null)
+  const [buttonDisabled, setButtonDisabled] = useState(false)
+
+  const fetchPatients = async () => {
+    try {
+      const dbPatients = await getPatients();
+      if (dbPatients) {
+        setpatients(dbPatients);
+      } else {
+        console.log("No patients found");
+      }
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const dbPatients = await getPatients();
-        if (dbPatients) {
-          setpatients(dbPatients);
-        } else {
-          console.log("No patients found");
-        }
-      } catch (error) {
-        console.error("Error fetching patients:", error);
-      }
-    };
-
     fetchPatients();
   }, [])
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setButtonDisabled(true);
+
+    const newPatient: PatientEdit = {
+      id: values.id,
+      email: values.email,
+      address: values.address,
+      phone: values.phone
+    }
+
+    await updatePatient(newPatient)
+
+    fetchPatients();
+    setButtonDisabled(false);
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-10vh)]">
@@ -52,41 +80,7 @@ export default function Home() {
               <CardDescription>{patient.dni}</CardDescription>
             </CardHeader>
             <CardContent className='flex justify-end items-center gap-3'>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="icon">
-                    <Eye />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>{patient.name} {patient.lastname}</DialogTitle>
-                    <DialogDescription>
-                      Información acerca de este paciente
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex items-center space-x-2">
-                    <IdCard className="w-4 h-4 opacity-70" />
-                    <span>76133536</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 opacity-70" />
-                    <span>José Valentino Masías Castillo</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Mail className="w-4 h-4 opacity-70" />
-                    <span>josval.personal@gmail.com</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Phone className="w-4 h-4 opacity-70" />
-                    <span>+51906706357</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <MapPinned className="w-4 h-4 opacity-70" />
-                    <span>Jirón 28 de Julio 330</span>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <PatientDialog patient={patient} />
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="icon">
@@ -100,41 +94,7 @@ export default function Home() {
                       Rellena los campos
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="mail" className="text-right">
-                        Correo
-                      </Label>
-                      <Input
-                        id="mail"
-                        defaultValue="josval.personal@gmail.com"
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="phone" className="text-right">
-                        Nro. Celular
-                      </Label>
-                      <Input
-                        id="phone"
-                        defaultValue="+51906706357"
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="direction" className="text-right">
-                        Dirección
-                      </Label>
-                      <Input
-                        id="direction"
-                        defaultValue="Jirón 28 de Julio 330"
-                        className="col-span-3"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button className="w-full" type="submit">Modificar</Button>
-                  </DialogFooter>
+                  <EditPatientForm patient={patient} onSubmit={onSubmit} buttonDisabled={buttonDisabled} />
                 </DialogContent>
               </Dialog>
             </CardContent>

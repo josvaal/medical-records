@@ -4,10 +4,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { UseFormReturn } from "react-hook-form"
+import { AddRecordFormData } from "./page"
 
 type AddRecordDialogProps = {
-  buttondisabled: any
-  form: any
+  buttondisabled: boolean,
+  form: UseFormReturn<AddRecordFormData>;
   onSubmit: any
 }
 

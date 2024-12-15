@@ -23,7 +23,7 @@ import { Patients } from "@/lib/models/Patients";
 import { getPatient } from "@/lib/patientMethods";
 import { PatientRecord } from "@/lib/models/PatientRecord";
 import { deleteRecord, getRecordsByPatientId, saveRecord, updateRecord } from "@/lib/recordMethods";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EditPatientRecord } from "@/lib/models/EditPatientRecord";
@@ -48,6 +48,7 @@ const formSchema = z.object({
   }),
 });
 
+export type AddRecordFormData = z.infer<typeof formSchema>;
 
 export default function Record({
   params,

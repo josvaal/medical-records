@@ -7,11 +7,13 @@ import {
   getDoc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { PatientCreate } from "./models/PatientCreate";
 import { Patients } from "./models/Patients";
 import { firestore } from "./database";
+import { PatientEdit } from "./models/PatientEdit";
 
 export async function getPatient(uid: string): Promise<Patients | null> {
   const docRef = doc(firestore, "patients", uid);
@@ -58,4 +60,10 @@ export async function addPatient(patient: PatientCreate): Promise<void> {
 
   const docRef = await addDoc(collection(firestore, "patients"), patient);
   console.log("Metadata subida a " + docRef.id);
+}
+
+export async function updatePatient(patient: PatientEdit): Promise<void> {
+  await updateDoc(doc(firestore, "patients", patient.id), {
+    ...patient
+  })
 }
