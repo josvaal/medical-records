@@ -13,7 +13,7 @@ import { UserLogin } from "./models/UserLogin";
 export async function register(user: UserRegister): Promise<void> {
   const q = query(
     collection(firestore, "user_metadata"),
-    where("dni", "==", user.dni),
+    where("dni", "==", user.dni)
   );
   const querySnapshot = await getDocs(q);
 
@@ -21,23 +21,27 @@ export async function register(user: UserRegister): Promise<void> {
     return;
   }
 
-  const userAuth = await createUserWithEmailAndPassword(auth, user.email, user.password);
+  const userAuth = await createUserWithEmailAndPassword(
+    auth,
+    user.email,
+    user.password
+  );
 
-  const { password, repeatPassword, ...userData } = user;
+  const { ...userData } = user;
 
   const docRef = await addDoc(collection(firestore, "user_metadata"), {
     ...userData,
-    id: userAuth.user.uid
+    id: userAuth.user.uid,
   });
   console.log("Metadata subida a " + docRef.id);
 
-  redirect("/")
+  redirect("/");
 }
 
 export async function login(user: UserLogin): Promise<void> {
   const q = query(
     collection(firestore, "user_metadata"),
-    where("dni", "==", user.dni),
+    where("dni", "==", user.dni)
   );
   const querySnapshot = await getDocs(q);
 
@@ -50,5 +54,5 @@ export async function login(user: UserLogin): Promise<void> {
 
   await signInWithEmailAndPassword(auth, data.email, user.password);
 
-  redirect("/")
+  redirect("/");
 }

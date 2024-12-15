@@ -81,6 +81,7 @@ export async function getMedic(): Promise<UserMetadata | null> {
   return userMetadata;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateMedic(medic: any): Promise<void> {
   const user = auth.currentUser
 

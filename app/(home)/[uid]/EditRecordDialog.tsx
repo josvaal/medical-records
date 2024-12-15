@@ -6,6 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { PatientRecord } from "@/lib/models/PatientRecord"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Pencil } from "lucide-react"
 import { useEffect } from "react"
@@ -25,9 +26,10 @@ export const editFormSchema = z.object({
 })
 
 type EditRecordDialogProps = {
-  buttondisabled: any
+  buttondisabled: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: any
-  record: any
+  record: PatientRecord
 }
 
 export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({ buttondisabled, onSubmit, record }) => {
@@ -49,7 +51,7 @@ export const EditRecordDialog: React.FC<EditRecordDialogProps> = ({ buttondisabl
       form.setValue("patientId", record.patientId);
       form.setValue("id", record.id)
     }
-  }, [record.id, form]);
+  }, [form, record]);
 
   return (
     <Dialog>

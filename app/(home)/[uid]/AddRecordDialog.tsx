@@ -1,19 +1,46 @@
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { UseFormReturn } from "react-hook-form"
-import { AddRecordFormData } from "./page"
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { UseFormReturn } from "react-hook-form";
+import { AddRecordFormData } from "./page";
 
 type AddRecordDialogProps = {
-  buttondisabled: boolean,
+  buttondisabled: boolean;
   form: UseFormReturn<AddRecordFormData>;
-  onSubmit: any
-}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSubmit: any;
+};
 
-export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({ buttondisabled, form, onSubmit }) => {
+export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({
+  buttondisabled,
+  form,
+  onSubmit,
+}) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -23,8 +50,7 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({ buttondisabled
         <DialogHeader>
           <DialogTitle>Añadir historia</DialogTitle>
           <DialogDescription>
-            Rellena los campos necesarios para añadir una nueva historia
-            médica
+            Rellena los campos necesarios para añadir una nueva historia médica
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -91,6 +117,7 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({ buttondisabled
               <FormField
                 control={form.control}
                 name="image"
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 render={({ field: { value, onChange, ...fieldProps } }) => (
                   <FormItem>
                     <FormLabel>Imágen</FormLabel>
@@ -98,9 +125,7 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({ buttondisabled
                       <Input
                         {...fieldProps}
                         onChange={(event) =>
-                          onChange(
-                            event.target.files && event.target.files[0],
-                          )
+                          onChange(event.target.files && event.target.files[0])
                         }
                         type="file"
                         accept="image/*"
@@ -117,8 +142,7 @@ export const AddRecordDialog: React.FC<AddRecordDialogProps> = ({ buttondisabled
             </Button>
           </form>
         </Form>
-
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};

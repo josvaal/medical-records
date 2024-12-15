@@ -1,31 +1,55 @@
-"use client"
+"use client";
 
 import Link from "next/link";
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Pencil } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Pencil } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { getPatients, updatePatient } from "@/lib/patientMethods";
 import { Patients } from "@/lib/models/Patients";
 import { PatientDialog } from "./PatientDialog";
 import { z } from "zod";
-import { EditPatientForm } from "../EditPatientForm";
+import { EditPatientForm } from "./EditPatientForm";
 import { PatientEdit } from "@/lib/models/PatientEdit";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formSchema = z.object({
   email: z.string().email({ message: "El correo electrónico no es válido" }),
   phone: z
     .string()
     .min(9, { message: "El número de celular debe tener al menos 9 dígitos" }),
-  address: z.string().min(5, { message: "La dirección debe tener más de 5 caracteres" }),
-  id: z.string()
-})
+  address: z
+    .string()
+    .min(5, { message: "La dirección debe tener más de 5 caracteres" }),
+  id: z.string(),
+});
 
 export default function Home() {
-  const [patients, setpatients] = useState<Patients[] | null>(null)
-  const [buttonDisabled, setButtonDisabled] = useState(false)
+  const [patients, setpatients] = useState<Patients[] | null>(null);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   const fetchPatients = async () => {
     try {
@@ -42,7 +66,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchPatients();
-  }, [])
+  }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setButtonDisabled(true);
@@ -51,10 +75,10 @@ export default function Home() {
       id: values.id,
       email: values.email,
       address: values.address,
-      phone: values.phone
-    }
+      phone: values.phone,
+    };
 
-    await updatePatient(newPatient)
+    await updatePatient(newPatient);
 
     fetchPatients();
     setButtonDisabled(false);
@@ -68,9 +92,9 @@ export default function Home() {
           <br />
         </div>
       ) : null}
-      <div className='grid grid-cols-1 md:grid-cols-2 p-3 gap-3'>
+      <div className="grid grid-cols-1 md:grid-cols-2 p-3 gap-3">
         {(patients ?? []).map((patient: Patients) => (
-          <Card key={patient.id} className='flex justify-between items-center'>
+          <Card key={patient.id} className="flex justify-between items-center">
             <CardHeader>
               <CardTitle>
                 <Link href={`/${patient.id}`}>
@@ -79,7 +103,7 @@ export default function Home() {
               </CardTitle>
               <CardDescription>{patient.dni}</CardDescription>
             </CardHeader>
-            <CardContent className='flex justify-end items-center gap-3'>
+            <CardContent className="flex justify-end items-center gap-3">
               <PatientDialog patient={patient} />
               <Dialog>
                 <DialogTrigger asChild>
@@ -89,20 +113,23 @@ export default function Home() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
-                    <DialogTitle>{patient.name} {patient.lastname}</DialogTitle>
-                    <DialogDescription>
-                      Rellena los campos
-                    </DialogDescription>
+                    <DialogTitle>
+                      {patient.name} {patient.lastname}
+                    </DialogTitle>
+                    <DialogDescription>Rellena los campos</DialogDescription>
                   </DialogHeader>
-                  <EditPatientForm patient={patient} onSubmit={onSubmit} buttonDisabled={buttonDisabled} />
+                  <EditPatientForm
+                    patient={patient}
+                    onSubmit={onSubmit}
+                    buttonDisabled={buttonDisabled}
+                  />
                 </DialogContent>
               </Dialog>
             </CardContent>
           </Card>
         ))}
       </div>
-      <div className="flex-1">
-      </div>
+      <div className="flex-1"></div>
       <Pagination>
         <PaginationContent>
           <PaginationItem>
@@ -114,14 +141,10 @@ export default function Home() {
             </PaginationLink>
           </PaginationItem>
           <PaginationItem>
-            <PaginationLink href="#?start=10?end=20">
-              2
-            </PaginationLink>
+            <PaginationLink href="#?start=10?end=20">2</PaginationLink>
           </PaginationItem>
           <PaginationItem>
-            <PaginationLink href="#?start=20?end=30">
-              3
-            </PaginationLink>
+            <PaginationLink href="#?start=20?end=30">3</PaginationLink>
           </PaginationItem>
           <PaginationItem>
             <PaginationEllipsis />
@@ -132,6 +155,5 @@ export default function Home() {
         </PaginationContent>
       </Pagination>
     </div>
-  )
+  );
 }
-

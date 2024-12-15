@@ -1,10 +1,12 @@
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { PatientRecord } from "@/lib/models/PatientRecord"
 import { Trash } from "lucide-react"
 
 type DeleteRecordDialogProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleDelete: any
-  record: any
+  record: PatientRecord
 }
 
 export const DeleteRecordDialog: React.FC<DeleteRecordDialogProps> = ({ handleDelete, record }) => {

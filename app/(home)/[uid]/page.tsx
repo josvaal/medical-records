@@ -22,8 +22,13 @@ import { use, useEffect, useState } from "react";
 import { Patients } from "@/lib/models/Patients";
 import { getPatient } from "@/lib/patientMethods";
 import { PatientRecord } from "@/lib/models/PatientRecord";
-import { deleteRecord, getRecordsByPatientId, saveRecord, updateRecord } from "@/lib/recordMethods";
-import { useForm, UseFormReturn } from "react-hook-form";
+import {
+  deleteRecord,
+  getRecordsByPatientId,
+  saveRecord,
+  updateRecord,
+} from "@/lib/recordMethods";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EditPatientRecord } from "@/lib/models/EditPatientRecord";
@@ -68,7 +73,7 @@ export default function Record({
 
   const [patient, setpatient] = useState<Patients | null>(null);
   const [records, setrecords] = useState<PatientRecord[] | null>(null);
-  const [buttondisabled, setbuttondisabled] = useState(false)
+  const [buttondisabled, setbuttondisabled] = useState(false);
 
   const fetchPatients = async () => {
     try {
@@ -85,8 +90,7 @@ export default function Record({
 
   const fetchRecords = async () => {
     try {
-      const records: PatientRecord[] | null =
-        await getRecordsByPatientId(uid);
+      const records: PatientRecord[] | null = await getRecordsByPatientId(uid);
       if (records) {
         setrecords(records);
       } else {
@@ -100,22 +104,23 @@ export default function Record({
   useEffect(() => {
     fetchPatients();
     fetchRecords();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setbuttondisabled(true);
     const response = await fetch("/api/upload", {
       method: "POST",
-      body: values.image
-    })
+      body: values.image,
+    });
 
     if (response.ok) {
       const data = await response.json();
       //console.log('Archivo guardado en:', data.filePath);
 
       const user = auth.currentUser;
-      console.log(user?.uid)
-      const medic: UserMetadata | null = await getMedicById(user?.uid ?? "")
+      console.log(user?.uid);
+      const medic: UserMetadata | null = await getMedicById(user?.uid ?? "");
 
       if (medic != null) {
         const patientRecord: CreatePatientRecord = {
@@ -124,25 +129,24 @@ export default function Record({
           doctor: {
             id: medic.id,
             name: medic.firstName,
-            lastname: medic.lastName
+            lastname: medic.lastName,
           },
           comment: values.comment ?? "",
           image: data.filePath,
-          patientId: uid
-        }
+          patientId: uid,
+        };
 
         //console.log(patientRecord)
         await saveRecord(patientRecord);
       } else {
-        console.log('Médico no encontrado');
+        console.log("Médico no encontrado");
       }
-
     } else {
-      console.error('Error en la subida del archivo');
+      console.error("Error en la subida del archivo");
     }
     //console.log(values);
     setbuttondisabled(false);
-    fetchRecords()
+    fetchRecords();
   }
 
   async function onEditSubmit(values: z.infer<typeof editFormSchema>) {
@@ -154,18 +158,18 @@ export default function Record({
       type: values.type,
       comment: values.comment ?? "",
       patientId: uid,
-    }
+    };
     console.log(values);
 
-    await updateRecord(patientRecord)
+    await updateRecord(patientRecord);
 
     setbuttondisabled(false);
-    fetchRecords()
+    fetchRecords();
   }
 
   async function handleDelete(id: string) {
-    await deleteRecord(id)
-    fetchRecords()
+    await deleteRecord(id);
+    fetchRecords();
   }
 
   return (
@@ -211,7 +215,11 @@ export default function Record({
       </div>
       <br />
       <div className="flex justify-center gap-2">
-        <AddRecordDialog buttondisabled={buttondisabled} form={form} onSubmit={onSubmit} />
+        <AddRecordDialog
+          buttondisabled={buttondisabled}
+          form={form}
+          onSubmit={onSubmit}
+        />
       </div>
       <br />
       {(records ?? []).length == 0 ? (
@@ -247,11 +255,15 @@ export default function Record({
             <h5 className="scroll-m-20 text-xl font-semibold tracking-tight">
               Tipo:
             </h5>
-            <p className="leading-7 mt-2 mb-5">{
-              record.type == "exam" ? "Exámen" :
-                record.type == "analysis" ? "Análisis" :
-                  record.type == "consultation" ? "Consulta" : ""
-            }</p>
+            <p className="leading-7 mt-2 mb-5">
+              {record.type == "exam"
+                ? "Exámen"
+                : record.type == "analysis"
+                ? "Análisis"
+                : record.type == "consultation"
+                ? "Consulta"
+                : ""}
+            </p>
             <h5 className="scroll-m-20 text-xl font-semibold tracking-tight">
               Comentarios:
             </h5>

@@ -13,7 +13,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { isLoading } = useStore()
+  const { isLoading } = useStore();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -29,7 +29,7 @@ export default function RootLayout({
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   if (isLoading) {
     return (
@@ -57,7 +57,6 @@ export default function RootLayout({
     );
   }
 
-
   return (
     <html lang="en" className="dark">
       <head>
@@ -67,4 +66,3 @@ export default function RootLayout({
     </html>
   );
 }
-

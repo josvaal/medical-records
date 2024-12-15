@@ -1,14 +1,16 @@
 import { Button } from "@/components/ui/button"
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Patients } from "@/lib/models/Patients"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 type EditPatientFormProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: any
-  patient: any
+  patient: Patients
   buttonDisabled: boolean
 }
 
@@ -39,7 +41,7 @@ export const EditPatientForm: React.FC<EditPatientFormProps> = ({ onSubmit, pati
     form.setValue("phone", patient.phone)
     form.setValue("address", patient.address)
     form.setValue("id", patient.id)
-  }, [])
+  }, [form, patient])
 
   return (
     <Form {...form}>

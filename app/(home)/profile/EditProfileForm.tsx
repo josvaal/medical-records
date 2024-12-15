@@ -4,7 +4,9 @@ import { Input } from "@/components/ui/input"
 
 type EditProfileFormProps = {
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: any
 }
 
