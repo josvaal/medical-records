@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,17 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ClipboardPlus } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import { Patients } from "@/lib/models/Patients";
 import { getPatient } from "@/lib/patientMethods";
@@ -186,33 +174,6 @@ export default function Record({
           No se encuentra este usuario
         </h2>
       )}
-      <br />
-      <div className="flex justify-center gap-2">
-        <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Selecciona un filtro" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Información</SelectLabel>
-              <SelectItem value="comment">Comentario</SelectItem>
-            </SelectGroup>
-            <SelectGroup>
-              <SelectLabel>Tipo</SelectLabel>
-              <SelectItem value="exam">Examen</SelectItem>
-              <SelectItem value="consultation">Consulta</SelectItem>
-              <SelectItem value="analysis">Análisis</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Input
-          placeholder="Buscar historial por filtro"
-          className="w-[20rem]"
-        />
-        <Button size="icon" variant="outline">
-          <ClipboardPlus />
-        </Button>
-      </div>
       <br />
       <div className="flex justify-center gap-2">
         <AddRecordDialog

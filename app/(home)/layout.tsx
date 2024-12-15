@@ -27,7 +27,6 @@ import { signOut } from "firebase/auth";
 import {
   House,
   LogOut,
-  RefreshCw,
   User,
   UserRoundPlus,
   UserRoundSearch,
@@ -266,15 +265,6 @@ export default function HomeLayout({
                   </Form>
                 </DialogContent>
               </Dialog>
-              <div className="flex gap-2">
-                <Input placeholder="Buscar por DNI" />
-                <Button variant="outline" size="icon">
-                  <UserRoundSearch />
-                </Button>
-                <Button variant="outline" size="icon">
-                  <RefreshCw />
-                </Button>
-              </div>
             </div>
             <div className="flex justify-end gap-5">
               <Link href="/profile">
