@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<h1 align="center" id="title">Historiales Medicos</h1>
 
-## Getting Started
+<p align="center"><img src="https://socialify.git.ci/josvaal/medical-records/image?font=Inter&amp;language=1&amp;name=1&amp;owner=1&amp;pattern=Plus&amp;stargazers=1&amp;theme=Dark" alt="project-image"></p>
 
-First, run the development server:
+<p id="description">Sistema de historial médico en Next.js 15 que utiliza Firebase para autenticación y base de datos permitiendo gestionar pacientes registros médicos y obtener datos del DNI de Perú mediante una API.</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+<p align="center"><img src="https://img.shields.io/badge/Next-black?style=for-the-badge&amp;logo=next.js&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&amp;logo=react&amp;logoColor=%2361DAFB" alt="shields"><img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&amp;logo=typescript&amp;logoColor=white" alt="shields"><img src="https://img.shields.io/badge/firebase-a08021?style=for-the-badge&amp;logo=firebase&amp;logoColor=ffcd34" alt="shields"></p>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+<h2>🚀 Demo</h2>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+[https://demo.com](https://demo.com)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<h2>Capturas de pantalla del proyecto:</h2>
 
-## Learn More
+<img src="https://github.com/josvaal/medical-records/blob/main/assets/1.png?raw=true" alt="project-screenshot" width="640" height="360/">
 
-To learn more about Next.js, take a look at the following resources:
+<img src="https://github.com/josvaal/medical-records/blob/main/assets/2.png?raw=true" alt="project-screenshot" width="640" height="360/">
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+<img src="https://github.com/josvaal/medical-records/blob/main/assets/3.png?raw=true" alt="project-screenshot" width="640" height="360/">
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+<img src="https://github.com/josvaal/medical-records/blob/main/assets/4.png?raw=true" alt="project-screenshot" width="640" height="360/">
 
-## Deploy on Vercel
+<img src="https://github.com/josvaal/medical-records/blob/main/assets/5.png?raw=true" alt="project-screenshot" width="640" height="360/">
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+  
+  
+<h2>🧐 Características</h2>
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Estas son algunas de las mejores características del proyecto:
+
+*   Integración con API de DNI Perú
+*   SSR
